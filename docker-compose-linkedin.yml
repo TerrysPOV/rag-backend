@@ -1,0 +1,98 @@
+version: '3.8'
+
+# Docker Compose for LinkedIn Lead Engine - AI Research Agent (Phase 2.1)
+#
+# Services:
+# - Neo4J: Graph database for company/person relationships
+# - Qdrant: Vector database for embeddings and semantic search
+# - Redis: Caching and rate limiting
+# - PostgreSQL: Document metadata (using Supabase connection)
+#
+# Note: This is a simplified compose for LinkedIn research backend only
+
+networks:
+  linkedin-research:
+    driver: bridge
+
+services:
+  # Neo4J - Graph Database for Relationships
+  neo4j:
+    image: neo4j:5.14-community
+    container_name: linkedin-neo4j
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-admin123}
+      NEO4J_dbms_memory_pagecache_size: 512M
+      NEO4J_dbms_memory_heap_initial__size: 512M
+      NEO4J_dbms_memory_heap_max__size: 1G
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: apoc.*
+    volumes:
+      - neo4j-data:/data
+      - neo4j-logs:/logs
+      - neo4j-import:/var/lib/neo4j/import
+      - neo4j-plugins:/plugins
+    networks:
+      - linkedin-research
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "${NEO4J_PASSWORD:-admin123}", "MATCH () RETURN count(*) as count"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # Qdrant - Vector Database
+  qdrant:
+    image: qdrant/qdrant:v1.7.3
+    container_name: linkedin-qdrant
+    environment:
+      QDRANT__SERVICE__HTTP_PORT: 6333
+      QDRANT__SERVICE__GRPC_PORT: 6334
+    volumes:
+      - qdrant-storage:/qdrant/storage
+    networks:
+      - linkedin-research
+    ports:
+      - "6333:6333"  # HTTP API
+      - "6334:6334"  # gRPC API
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis - Caching and Rate Limiting
+  redis:
+    image: redis:7-alpine
+    container_name: linkedin-redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis123}
+    volumes:
+      - redis-data:/data
+    networks:
+      - linkedin-research
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD:-redis123}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  neo4j-data:
+    driver: local
+  neo4j-logs:
+    driver: local
+  neo4j-import:
+    driver: local
+  neo4j-plugins:
+    driver: local
+  qdrant-storage:
+    driver: local
+  redis-data:
+    driver: local
