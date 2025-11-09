@@ -283,9 +283,7 @@ class Neo4JGraphService:
             logger.error(f"Error getting entity details for {entity_id}: {e}")
             raise
 
-    def get_visualization_data(
-        self, entity_id: str, depth: int = 2
-    ) -> Dict[str, Any]:
+    def get_visualization_data(self, entity_id: str, depth: int = 2) -> Dict[str, Any]:
         """
         Get graph data for visualization (nodes and edges).
 

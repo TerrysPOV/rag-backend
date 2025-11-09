@@ -19,7 +19,6 @@ from fastapi import APIRouter, HTTPException, status, BackgroundTasks
 from pydantic import BaseModel, Field
 
 from src.services.neo4j_graph_service import get_graph_service
-from src.services.neo4j_graph_extractor import get_graph_extractor
 from src.services.neo4j_graph_retriever import get_graph_retriever
 
 logger = logging.getLogger(__name__)
@@ -172,7 +171,9 @@ def get_neo4j_config() -> Dict[str, str]:
 # ============================================================================
 
 
-@router.post("/extract", status_code=status.HTTP_202_ACCEPTED, response_model=GraphExtractionResponse)
+@router.post(
+    "/extract", status_code=status.HTTP_202_ACCEPTED, response_model=GraphExtractionResponse
+)
 async def trigger_graph_extraction(
     request: GraphExtractionRequest,
     background_tasks: BackgroundTasks,
@@ -187,7 +188,8 @@ async def trigger_graph_extraction(
     In production, this would queue a Celery task for async processing.
     """
     try:
-        config = get_neo4j_config()
+        # Validate Neo4J configuration is available
+        get_neo4j_config()
 
         # For now, return a placeholder job ID
         # In production, this would queue a Celery task
