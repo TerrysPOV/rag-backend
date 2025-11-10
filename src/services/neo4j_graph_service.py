@@ -101,7 +101,9 @@ class Neo4JGraphService:
                     count = record["count"]
                     # Use first label as primary type
                     if labels:
-                        primary_label = labels[0] if isinstance(labels, list) else str(labels)
+                        primary_label = (
+                            labels[0] if isinstance(labels, list) else str(labels)
+                        )
                         node_counts[primary_label] = count
 
                 # Get relationship counts by type
@@ -129,7 +131,9 @@ class Neo4JGraphService:
                 # For directed graph: possible_edges = n * (n - 1)
                 if total_nodes > 1:
                     possible_edges = total_nodes * (total_nodes - 1)
-                    graph_density = total_rels / possible_edges if possible_edges > 0 else 0.0
+                    graph_density = (
+                        total_rels / possible_edges if possible_edges > 0 else 0.0
+                    )
                 else:
                     graph_density = 0.0
 
@@ -251,7 +255,9 @@ class Neo4JGraphService:
 
                 entity_node = record["e"]
                 labels = record["labels"]
-                outgoing_rels = [r for r in record["outgoing_rels"] if r["type"] is not None]
+                outgoing_rels = [
+                    r for r in record["outgoing_rels"] if r["type"] is not None
+                ]
 
                 # Get incoming relationships
                 incoming_query = """
@@ -333,7 +339,10 @@ class Neo4JGraphService:
             raise
 
     def search_entities(
-        self, search_term: str, entity_types: Optional[List[str]] = None, limit: int = 20
+        self,
+        search_term: str,
+        entity_types: Optional[List[str]] = None,
+        limit: int = 20,
     ) -> List[Dict[str, Any]]:
         """
         Search for entities by text/name.
@@ -353,7 +362,9 @@ class Neo4JGraphService:
             with self.driver.session(database=self.neo4j_database) as session:
                 if entity_types:
                     # Search with type filter
-                    labels_filter = " OR ".join([f"'{t}' IN labels(e)" for t in entity_types])
+                    labels_filter = " OR ".join(
+                        [f"'{t}' IN labels(e)" for t in entity_types]
+                    )
                     query = f"""
                     MATCH (e)
                     WHERE ({labels_filter})
@@ -433,7 +444,9 @@ class Neo4JGraphService:
                     """
                 )
 
-                logger.info("✓ Neo4J schema initialized (constraints and indexes created)")
+                logger.info(
+                    "✓ Neo4J schema initialized (constraints and indexes created)"
+                )
 
         except Exception as e:
             logger.error(f"Error initializing schema: {e}")

@@ -115,7 +115,9 @@ class Neo4JGraphExtractor:
                 r"(must|required to|need to|should|have to|necessary to|mandatory)\s+(provide|submit|demonstrate|show|have|hold|meet|satisfy)",
                 re.IGNORECASE,
             ),
-            "time_period": re.compile(r"\d+\s*(day|week|month|year|hour)s?", re.IGNORECASE),
+            "time_period": re.compile(
+                r"\d+\s*(day|week|month|year|hour)s?", re.IGNORECASE
+            ),
             "money": re.compile(r"£\d+(?:,\d{3})*(?:\.\d{2})?"),
         }
 
@@ -141,7 +143,9 @@ class Neo4JGraphExtractor:
             self.driver.close()
             logger.info("Neo4J driver closed")
 
-    @component.output_types(entities=List[Dict[str, Any]], relationships=List[Tuple[str, str, str]])
+    @component.output_types(
+        entities=List[Dict[str, Any]], relationships=List[Tuple[str, str, str]]
+    )
     def run(self, documents: List[Document]) -> Dict[str, Any]:
         """
         Extract entities and relationships from documents.
@@ -268,7 +272,9 @@ class Neo4JGraphExtractor:
         Uses OpenRouter API with structured JSON extraction prompts.
         """
         entities = []
-        content = doc.content[:4000] if doc.content else ""  # Limit to 4k chars for cost
+        content = (
+            doc.content[:4000] if doc.content else ""
+        )  # Limit to 4k chars for cost
 
         if not content.strip():
             return entities
@@ -302,11 +308,15 @@ If no entities found, return: {{"requirements": [], "conditions": [], "processes
                 response_data = json.loads(response_text)
             except json.JSONDecodeError:
                 # Try to extract JSON from markdown code blocks
-                json_match = re.search(r"```(?:json)?\s*(\{.*\})\s*```", response_text, re.DOTALL)
+                json_match = re.search(
+                    r"```(?:json)?\s*(\{.*\})\s*```", response_text, re.DOTALL
+                )
                 if json_match:
                     response_data = json.loads(json_match.group(1))
                 else:
-                    logger.warning(f"Failed to parse LLM response as JSON: {response_text[:200]}")
+                    logger.warning(
+                        f"Failed to parse LLM response as JSON: {response_text[:200]}"
+                    )
                     return entities
 
             # Process requirements
@@ -401,7 +411,9 @@ If no entities found, return: {{"requirements": [], "conditions": [], "processes
             sent_lower = sent.lower()
 
             req_in_sent = [r for r in req_entities if r["text"].lower() in sent_lower]
-            doc_in_sent = [d for d in doc_type_entities if d["text"].lower() in sent_lower]
+            doc_in_sent = [
+                d for d in doc_type_entities if d["text"].lower() in sent_lower
+            ]
 
             for req in req_in_sent:
                 for doc_type in doc_in_sent:
@@ -457,11 +469,14 @@ If no entities found, return: {{"requirements": [], "conditions": [], "processes
         logger.debug(f"Created/updated {count} entities in batch")
 
     @staticmethod
-    def _create_relationship_batch(tx, relationships: List[Tuple[str, str, str]]) -> None:
+    def _create_relationship_batch(
+        tx, relationships: List[Tuple[str, str, str]]
+    ) -> None:
         """Cypher query to create relationships dynamically."""
         # Format relationships for Cypher
         rels_formatted = [
-            {"source": src, "type": rel_type, "target": tgt} for src, rel_type, tgt in relationships
+            {"source": src, "type": rel_type, "target": tgt}
+            for src, rel_type, tgt in relationships
         ]
 
         query = """

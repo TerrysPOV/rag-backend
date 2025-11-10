@@ -82,7 +82,9 @@ class Neo4JGraphRetriever:
             )
             self.nlp = None
 
-        logger.info(f"Neo4JGraphRetriever initialized (max_depth={max_depth}, top_k={top_k})")
+        logger.info(
+            f"Neo4JGraphRetriever initialized (max_depth={max_depth}, top_k={top_k})"
+        )
 
     def _connect_neo4j(self) -> None:
         """Establish Neo4J connection."""
@@ -295,7 +297,9 @@ class Neo4JGraphRetriever:
                 doc_map[doc.id] = doc
 
         # Sort by score and return documents
-        sorted_doc_ids = sorted(doc_scores.keys(), key=lambda d: doc_scores[d], reverse=True)
+        sorted_doc_ids = sorted(
+            doc_scores.keys(), key=lambda d: doc_scores[d], reverse=True
+        )
 
         # Update documents with final scores
         ranked_docs = []
@@ -309,7 +313,9 @@ class Neo4JGraphRetriever:
 
         return ranked_docs
 
-    def _generate_explanation_paths(self, documents: List[Document]) -> List[Dict[str, Any]]:
+    def _generate_explanation_paths(
+        self, documents: List[Document]
+    ) -> List[Dict[str, Any]]:
         """Generate human-readable explanation of graph traversal."""
         paths = []
 

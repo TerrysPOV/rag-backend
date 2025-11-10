@@ -48,7 +48,9 @@ class GraphExtractionResponse(BaseModel):
     """Response from graph extraction trigger."""
 
     job_id: str = Field(..., description="Job ID for tracking extraction progress")
-    status: str = Field(..., description="Job status (queued, running, completed, failed)")
+    status: str = Field(
+        ..., description="Job status (queued, running, completed, failed)"
+    )
     message: str = Field(..., description="Human-readable status message")
 
 
@@ -56,7 +58,9 @@ class GraphStatsResponse(BaseModel):
     """Graph statistics response."""
 
     node_counts: Dict[str, int] = Field(..., description="Node counts by type")
-    relationship_counts: Dict[str, int] = Field(..., description="Relationship counts by type")
+    relationship_counts: Dict[str, int] = Field(
+        ..., description="Relationship counts by type"
+    )
     total_nodes: int = Field(..., description="Total number of nodes")
     total_relationships: int = Field(..., description="Total number of relationships")
     graph_density: float = Field(..., description="Graph density (0-1)")
@@ -66,9 +70,13 @@ class GraphStatsResponse(BaseModel):
 class GraphHealthResponse(BaseModel):
     """Graph health check response."""
 
-    status: str = Field(..., description="Health status (healthy, degraded, unhealthy, error)")
+    status: str = Field(
+        ..., description="Health status (healthy, degraded, unhealthy, error)"
+    )
     orphaned_nodes: int = Field(0, description="Number of orphaned nodes")
-    broken_references: int = Field(0, description="Number of broken chunk_id references")
+    broken_references: int = Field(
+        0, description="Number of broken chunk_id references"
+    )
     warnings: List[str] = Field(default_factory=list, description="Health warnings")
     errors: List[str] = Field(default_factory=list, description="Health errors")
     timestamp: str = Field(..., description="Check timestamp (ISO format)")
@@ -77,9 +85,13 @@ class GraphHealthResponse(BaseModel):
 class QueryGraphRequest(BaseModel):
     """Request for graph-augmented RAG query."""
 
-    query: str = Field(..., min_length=1, max_length=1000, description="Natural language query")
+    query: str = Field(
+        ..., min_length=1, max_length=1000, description="Natural language query"
+    )
     use_graph: bool = Field(True, description="Enable graph traversal retrieval")
-    max_graph_depth: int = Field(3, ge=1, le=5, description="Maximum graph traversal depth")
+    max_graph_depth: int = Field(
+        3, ge=1, le=5, description="Maximum graph traversal depth"
+    )
     top_k: int = Field(5, ge=1, le=100, description="Number of results to return")
 
 
@@ -115,7 +127,9 @@ class VisualizationDataResponse(BaseModel):
 class EntitySearchRequest(BaseModel):
     """Entity search request."""
 
-    search_term: str = Field(..., min_length=1, max_length=200, description="Search query")
+    search_term: str = Field(
+        ..., min_length=1, max_length=200, description="Search query"
+    )
     entity_types: Optional[List[str]] = Field(
         None, max_items=10, description="Filter by entity types"
     )
@@ -175,7 +189,9 @@ def get_neo4j_config() -> Dict[str, str]:
 
 
 @router.post(
-    "/extract", status_code=status.HTTP_202_ACCEPTED, response_model=GraphExtractionResponse
+    "/extract",
+    status_code=status.HTTP_202_ACCEPTED,
+    response_model=GraphExtractionResponse,
 )
 async def trigger_graph_extraction(
     request: GraphExtractionRequest,
@@ -360,7 +376,8 @@ async def get_entity_details(entity_id: str):
 
         if not entity:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"Entity {entity_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Entity {entity_id} not found",
             )
 
         return EntityDetailsResponse(**entity)
